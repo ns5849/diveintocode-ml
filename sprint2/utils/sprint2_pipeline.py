@@ -52,7 +52,8 @@ def pipeline_classifier(model, X, Y, target_value, feature_value, pos_label=1, p
     Parameter
     ---------------
     model : 利用するライブラリのオブジェクト
-    data : data
+    X : data(feature)
+    Y : data(target)
     target_value :目的変数名
     feature_value :　説明変数名
     pos_label : 目的変数 Positive label指定
@@ -69,13 +70,23 @@ def pipeline_classifier(model, X, Y, target_value, feature_value, pos_label=1, p
 
     # 学習データ、テストデータに分ける
     print('Split data train & test')
-    train_feature, test_feature, train_target, test_target = train_test_split(X, Y, test_size=0.25, random_state=42)
+    train_feature, test_feature, train_target, test_target = train_test_split(X, Y,
+                                                                        test_size=params.get('split_test_size'),
+                                                                        random_state=params.get('split_random_state'))
     print('元データ数：{}　学習データ数：{}　検証データ数：{}'
           .format(len(Y), len(train_target), len(test_target)))
     #train_feature = train_data[feature_value].values
     #train_target = train_data[target_value].values
     #test_feature = test_data[feature_value].values
     #test_target = test_data[target_value].values
+
+    if params.get('normalization_on') == True:
+        print('Normalize feature data')
+        scaler = StandardScaler()
+        scaler.fit(train_feature)
+        train_feature = scaler.transform(train_feature)
+        scaler.fit(test_feature)
+        test_feature = scaler.transform(test_feature)
 
     if params.get('grid_search_on') == True:
         # 時間がかかるのでtrain dataを絞る (サンプリングのやり方はあとで再度考える)
@@ -91,14 +102,6 @@ def pipeline_classifier(model, X, Y, target_value, feature_value, pos_label=1, p
         grid_search.fit(tmp[feature_value].values, tmp[target_value].values)
         model.set_params(**grid_search.best_params_)
         print('Set best params ', grid_search.best_params_)
-
-    if params.get('normalization_on') == True:
-        print('Normalize feature data')
-        scaler = StandardScaler()
-        scaler.fit(train_feature)
-        train_feature = scaler.transform(train_feature)
-        scaler.fit(test_feature)
-        test_feature = scaler.transform(test_feature)
 
     # 学習と予測
     result, fpr, tpr, auc = train_model(
