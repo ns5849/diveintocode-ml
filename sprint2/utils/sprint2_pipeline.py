@@ -10,6 +10,21 @@ import seaborn as sb
 import pandas as pd
 
 
+param_default =  {
+            "split_test_size" : 0.25,
+            "split_random_state" : 42,
+            "normalization_on": True,
+            "roc_plot_off": False,
+            "cv_on": False,
+            "cv_split": 5,
+            "cv_random_state" : None,
+            "cv_shuffle" : True,
+            "grid_search_on" : False,
+            "grid_search_samples" : "ALL",
+            "result_format" : "predict_as_binary"
+        }
+
+
 def plot_roc(fpr, tpr):
     plt.step(fpr, tpr, color='b', alpha=0.2, where='post')
     plt.fill_between(fpr, tpr, step='post', alpha=0.2, color='b')
@@ -47,7 +62,7 @@ def train_model(model, train_feature, train_target, test_feature, test_target, p
     return result, fpr, tpr, auc
 
 
-def pipeline_classifier(model, X, Y, target_value, feature_value, pos_label=1, params={}, params_grid={}):
+def pipeline_classifier(model, X, Y, target_value, feature_value, pos_label=1, params=param_default, params_grid={}):
     """
     Parameter
     ---------------
@@ -93,7 +108,13 @@ def pipeline_classifier(model, X, Y, target_value, feature_value, pos_label=1, p
         data_feature = pd.DataFrame(data=train_feature, columns=feature_value)
         data_target = pd.DataFrame(data=train_target, columns=[target_value])
         data = pd.concat([data_feature, data_target], axis=1)
-        tmp = data.sample(n=params.get('grid_search_samples'))
+        if params.get('grid_search_samples') == 'All':
+            num_of_grid_search_sample = len(data.index)
+        else:
+            num_of_grid_search_sample = params.get('grid_search_samples')
+        tmp = data.sample(n=num_of_grid_search_sample)
+        print('Run GridSearch with {} samples'.format(num_of_grid_search_sample))
+
         grid_search = GridSearchCV(
             model,
             param_grid=params_grid.get('hyper_param'),
