@@ -57,10 +57,10 @@ class ScratchLinearRegression():
         """
 
         # 1-1. データを shape(n_feature, n_samples)へ整形, θをshape(n_feature, 1)へ整形　h=dot( (θ)t, X)とするため。
-        train_feature = X.T
-        train_target = y.T
-        test_feature = X_val.T
-        test_target = y_val.T
+        train_feature = X.reshape(X.shape[1], X.shape[0])
+        train_target = y.reshape(1, len(y))
+        test_feature = X_val.reshape(X_val.shape[1], X_val.shape[0])
+        test_target = y_val.reshape(1, len(y_val))
 
         # 1-2. バイアスを追加 if self.bias = True
         # train_feature, test_featureの特徴量方向(index方向)にバイアス成分を追加 X = 1,1,1...,1
@@ -82,21 +82,19 @@ class ScratchLinearRegression():
         # 2. 最急降下法(Loopをiter回だけ回す)　
         for i in range(0, self.iter):
             self.theta = self._gradient_descent(train_feature, train_target)
+            self.loss[i] = self._compute_cost(train_feature, train_target)
+            self.loss_theta[i] = self.theta.T.reshape(-1)
+            if len(test_target) != 0:
+                self.val_loss[i] = self._compute_cost(test_feature, test_target)
 
             if self.verbose:
                 # verboseをTrueにした際は学習過程を出力
-                self.loss[i] = self._compute_cost(train_feature, train_target)
-                self.loss_theta[i] = self.theta.T.reshape(-1)
+                print("Loop={} loss={}".format(i, self.loss[i]))
 
-                if len(test_target) != 0:
-                    self.val_loss[i] = self._compute_cost(test_feature, test_target)
-                    # Accuracy
-
-        tmp = self._test_predict(train_feature)
-        print("Theta:\n{}".format(self.theta))
-        print("Feature:\n{}".format(train_feature))
-        print("Target:\n{}".format(train_target))
-        print("Result:\n{}".format(tmp))
+        print("Theta:\n", self.theta)
+        print("Feature:\n", train_feature)
+        print("Target:\n", train_target)
+        print("Result:\n", self._test_predict(train_feature))
 
         return
 
