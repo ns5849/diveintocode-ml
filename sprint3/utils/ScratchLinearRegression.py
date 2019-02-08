@@ -37,7 +37,8 @@ class ScratchLinearRegression():
         # 損失を記録する配列を用意
         self.loss = np.zeros(self.iter)
         self.val_loss = np.zeros(self.iter)
-        self.loss_theta = np.zeros(self.iter)
+        self.loss_theta = 0
+        self.theta = 0
 
     def fit(self, X, y, X_val=None, y_val=None):
         """
@@ -75,22 +76,20 @@ class ScratchLinearRegression():
         self.theta = np.random.randint(THETA_INIT_MIN, THETA_INIT_MAX, train_feature.shape[0])
         # self.theta = np.array([0.1 for _ in range(train_feature.shape[0])])
         self.theta = np.reshape(self.theta, (len(self.theta), 1))
+        self.loss_theta = np.zeros((self.iter, (len(self.theta))))
         print("Initial theta:\n{}".format(self.theta))
 
         # 2. 最急降下法(Loopをiter回だけ回す)　
         for i in range(0, self.iter):
             self.theta = self._gradient_descent(train_feature, train_target)
-            #print("Loop:{}  Theta:\n{}".format(i, self.theta))
-            self.loss_theta[i] = self.theta[-1]
 
             if self.verbose:
                 # verboseをTrueにした際は学習過程を出力
                 self.loss[i] = self._compute_cost(train_feature, train_target)
-                #print("Loop:{}  Loss(train data):{}".format(i, self.loss[i]))
+                self.loss_theta[i] = self.theta.T.reshape(-1)
 
                 if len(test_target) != 0:
                     self.val_loss[i] = self._compute_cost(test_feature, test_target)
-                    # print("Loop:{}  Loss(test data):{}".format(i, self.val_loss[i]))
                     # Accuracy
 
         tmp = self._test_predict(train_feature)
@@ -147,7 +146,6 @@ class ScratchLinearRegression():
 
         return mse
 
-
     def _test_predict(self, X):
         """
         線形回帰を使い推定する。
@@ -165,7 +163,6 @@ class ScratchLinearRegression():
 
         # _linear_hypothesis(self, X)を使って計算
         return self._linear_hypothesis(X)
-
 
     def _linear_hypothesis(self, X):
         """
@@ -223,10 +220,10 @@ class ScratchLinearRegression():
         plt.yscale("Log")
         plt.show()
 
-    def plot_theta_loss(self):
+    def plot_theta_loss(self, num_of_feature):
         plt.title("theta vs loss")
-        plt.xlabel("theta")
+        plt.xlabel("theta (Feature={})".format(num_of_feature))
         plt.ylabel("loss")
-        plt.scatter(self.loss_theta, self.loss, s=50, marker='*', color='r')
+        plt.scatter(self.loss_theta[:, num_of_feature], self.loss, s=50, marker='*', color='r')
         plt.legend()
         plt.show()
