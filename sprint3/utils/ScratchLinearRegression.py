@@ -57,9 +57,9 @@ class ScratchLinearRegression():
         """
 
         # 1-1. データを shape(n_feature, n_samples)へ整形, θをshape(n_feature, 1)へ整形　h=dot( (θ)t, X)とするため。
-        train_feature = X.reshape(X.shape[1], X.shape[0])
+        train_feature = X.T
         train_target = y.reshape(1, len(y))
-        test_feature = X_val.reshape(X_val.shape[1], X_val.shape[0])
+        test_feature = X_val.T
         test_target = y_val.reshape(1, len(y_val))
 
         # 1-2. バイアスを追加 if self.bias = True
