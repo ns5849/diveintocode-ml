@@ -406,13 +406,13 @@ class ScratchLogisticRegression(ScratchClfEvaluation):
         Returns
         -------
         """
-        delta = self._logistic_hypothesis(X) - y
-        theta_step = (self.lr * np.dot(X, delta.T) / X.shape[1])
-        if self.bias == True:
-            theta_step[1:theta_step.shape[0]] += (self.C / X.shape[1]) * self.theta[1:theta_step.shape[0]]
-        else:
-            theta_step += (self.C / X.shape[1]) * self.theta
 
+        mask = np.ones_like(self.theta, dtype=int)
+        if self.bias == True:
+            mask[0] = 0
+
+        delta = self._logistic_hypothesis(X) - y
+        theta_step = (np.dot(X, delta.T) + self.theta * mask * self.C / X.shape[1]) * self.lr / X.shape[1]
         return self.theta - theta_step
 
     def _standval_to_actval(self, x):
@@ -442,3 +442,16 @@ class ScratchLogisticRegression(ScratchClfEvaluation):
         plt.scatter(self.theta_cal_log[:, num_of_feature], self.cross_entropy, s=50, marker='*', color='r')
         plt.legend()
         plt.show()
+
+    def plot_boundary(self, feature, target, index_of_x1, index_of_x2):
+        if self.bias == True:
+            b = self.theta[0]
+        else:
+            b = 0
+
+        y = -1 * (b + self.theta[index_of_x1]) / self.theta[index_of_x2] * feature[:, index_of_x1]
+        plt.title("Boundary")
+        plt.xlabel("Feature index={}".format(index_of_x1))
+        plt.ylabel("Feature index={}".format(index_of_x2))
+        plt.plot(feature[:, index_of_x1], y, label="Logistic boundary")
+        plt.scatter(feature[:, index_of_x1], feature[:, index_of_x2], c=target)
