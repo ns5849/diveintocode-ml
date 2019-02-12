@@ -1,5 +1,6 @@
 import numpy as np
 import matplotlib.pyplot as plt
+import time
 
 
 class ScratchClfEvaluation:
@@ -170,7 +171,6 @@ class ScratchSVMClassifier(ScratchClfEvaluation):
             self.hit_vector_cnt_threshold = 2
         self.kernel = kernel
         self.verbose = verbose
-        # 損失を記録する配列を用意
         self.lam = 0
         self.sp_vector = 0
         self.num_of_feature = 0
@@ -180,6 +180,7 @@ class ScratchSVMClassifier(ScratchClfEvaluation):
         self.gamma = gamma
         self.theta0 = theta0
         self.pow_d = pow_d
+        self.start_time = [0 for _ in range(8)]
 
     def fit(self, arg_X, arg_y, arg_X_val=None, arg_y_val=None):
         """
@@ -247,6 +248,7 @@ class ScratchSVMClassifier(ScratchClfEvaluation):
         print("Initial lambda:\n{}".format(self.lam))
 
         # 2. 最急降下法(Loopをiter回だけ回す)　
+        self._start_timer(1)
         is_fit = False
         for i in range(0, self.iter):
             self.lam = self._gradient_descent(X, y)
@@ -272,6 +274,7 @@ class ScratchSVMClassifier(ScratchClfEvaluation):
 
                     break
 
+        self._stop_timer(1)
         return is_fit
 
     def predict(self, arg_X):
@@ -442,3 +445,12 @@ class ScratchSVMClassifier(ScratchClfEvaluation):
     def view_sp_vector(self):
         # print(self.sp_vector)
         return self.sp_vector
+
+    def _start_timer(self, timer_index):
+        self.start_time[timer_index] = time.time()
+
+    def _stop_timer(self, timer_index):
+        if self.start_time[timer_index] != 0:
+            print( "Timer_index={}  Elapsed time={}".format(timer_index, time.time() - self.start_time[timer_index]))
+        else:
+            print("Timer isn't started")
