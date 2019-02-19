@@ -97,16 +97,16 @@ class ScratchKMeans():
                 print("COMP! Condition1 Loop:{}".format(i))
                 break
             #クラスタの中心と計算された重心が指定した距離範囲に収まったら終了
-            repeat = 0
+            sample_count = 0
             for index in range(self.center_info.shape[1]):
                 row = self.center_info.shape[0]
                 point_a = self.center_info[:, index].reshape((row, 1))
                 point_b = prev_center_info[:, index].reshape((row, 1))
                 if self._cal_distance(point_a, point_b) < self.settle_distance:
                     #print("cal:{} condition:{}".format(self._cal_distance(point_a, point_b), self.settle_distance))
-                    repeat += 1
+                    sample_count += 1
 
-            if repeat == self.center_info.shape[1]:
+            if sample_count == self.center_info.shape[1]:
                 print("COMP! Condition2 Loop:{}".format(i))
                 break
 
